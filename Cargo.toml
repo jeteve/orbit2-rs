@@ -1,5 +1,5 @@
 [package]
-name = "orbit-sys"
+name = "orbit2-sys"
 version = "0.1.0"
 edition = "2021"
 
