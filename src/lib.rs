@@ -7,19 +7,44 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 #[cfg(test)]
 mod tests {
     use super::*;
-    use core::ptr;
-    use std::{borrow::BorrowMut, ffi::CString};
+    use core::ptr::addr_of_mut;
+    use std::ffi::CString;
 
     #[test]
     fn base_client() {
-        let cfilename = CString::new("foo.txt").unwrap();
-        let filename: *const super::CORBA_char = cfilename.as_ptr();
-        let mut ev: super::CORBA_Environment = unsafe { std::mem::zeroed() };
-        unsafe { super::CORBA_exception_init(ptr::addr_of_mut!(ev)) };
+        let cfilename = CString::new("echo.ref").unwrap();
+        let filename: *const CORBA_char = cfilename.as_ptr();
+        let mut ev: CORBA_Environment = unsafe { std::mem::zeroed() };
+        unsafe { super::CORBA_exception_init(addr_of_mut!(ev)) };
 
-        let argc: std::ffi::c_int = 1;
-        let mut carg1 = CString::new("bla").unwrap();
-        let arg1 = carg1.into_raw();
-        // TODO: let orb = super::CORBA_ORB_init(ptr::addr_of_mut!(argc));
+        let args: Vec<String> = vec![];
+
+        let mut argc = args.len() as i32;
+
+        // This MUST hold the CStrings.
+        let mut argv = args
+            .into_iter()
+            .map(|s| CString::new(s).unwrap_or_default())
+            .map(|cs| cs.into_raw())
+            .collect::<Vec<_>>();
+
+        let orb_identifier: CORBA_ORBid = CString::new("orbit-local-mt-orb").unwrap().into_raw();
+
+        let orb = unsafe {
+            CORBA_ORB_init(
+                addr_of_mut!(argc),
+                argv.as_mut_ptr(),
+                orb_identifier,
+                addr_of_mut!(ev),
+            )
+        };
+
+        //let object = CORBA_ORB_string_to_object(orb, addr_of_mut!(ev));
+
+        // Retake ownership of the raw CSStrings so they can be freed in Rust.
+        let _ = argv
+            .into_iter()
+            .map(|ptr| unsafe { CString::from_raw(ptr) })
+            .collect::<Vec<_>>();
     }
 }
