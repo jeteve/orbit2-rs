@@ -6,6 +6,8 @@
 #![allow(unused_imports)]
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
+pub mod toolkit;
+
 mod echo;
 
 #[cfg(test)]

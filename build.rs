@@ -21,6 +21,8 @@ fn main() {
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .allowlist_function("CORBA_exception_init")
         .allowlist_function("CORBA_ORB_init")
+        .allowlist_type("CORBA_exception_type")
+        .allowlist_function("CORBA_exception_id")
         .generate()
         .expect("Unable to generate bindings");
 
