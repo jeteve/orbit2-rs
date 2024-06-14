@@ -1,8 +1,11 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
+#![allow(dead_code, unused_variables)] 
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+
+mod echo;
 
 #[cfg(test)]
 mod tests {
@@ -46,5 +49,6 @@ mod tests {
             .into_iter()
             .map(|ptr| unsafe { CString::from_raw(ptr) })
             .collect::<Vec<_>>();
+        let _ = unsafe { CString::from_raw(orb_identifier) };
     }
 }
