@@ -19,10 +19,16 @@ fn main() {
         .header("wrapper.h")
         .clang_args(includes.clone()) // https://stackoverflow.com/questions/64390316/problems-linking-header-files-with-rust-bindgen
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .allowlist_function("CORBA_exception_free")
+        .allowlist_function("CORBA_exception_id")
         .allowlist_function("CORBA_exception_init")
         .allowlist_function("CORBA_ORB_init")
+        .allowlist_function("CORBA_ORB_object_to_string")
+        .allowlist_function("CORBA_ORB_string_to_object")
         .allowlist_type("CORBA_exception_type")
-        .allowlist_function("CORBA_exception_id")
+        .allowlist_type("CORBA_Object")
+        .allowlist_item("CORBA_OBJECT_NIL")
+        .allowlist_item("NULL")
         .generate()
         .expect("Unable to generate bindings");
 
