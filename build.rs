@@ -19,6 +19,8 @@ fn main() {
         .header("wrapper.h")
         .clang_args(includes.clone()) // https://stackoverflow.com/questions/64390316/problems-linking-header-files-with-rust-bindgen
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .allowlist_function("CORBA_exception_init")
+        .allowlist_function("CORBA_ORB_init")
         .generate()
         .expect("Unable to generate bindings");
 
@@ -31,7 +33,9 @@ fn main() {
     // Echo service binding. Do this for every service
     let echo_binding = bindgen::Builder::default()
         .header("wrapper_echo.h")
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .clang_args(includes.clone())
+        .allowlist_function("hfiuewhfiuwhfiuewhf")
         .generate()
         .expect("Unable to generate bindings");
     echo_binding
@@ -42,6 +46,8 @@ fn main() {
         .file("csrc/echo-common.c")
         .file("csrc/echo-skels.c")
         .file("csrc/echo-stubs.c")
+        .flag("-Wno-unused-const-variable")
+        .flag("-Wno-unused-parameter")
         .includes(Path::new("csrc"))
         .includes(lib.include_paths)
         .compile("echo_idl");
