@@ -47,6 +47,9 @@ NULL,             /* default_POA routine */
 
 
 */
+static mut impl_Echo_epv: POA_Echo__epv = unsafe { mem::zeroed() };
+static mut impl_Echo_base_epv: PortableServer_ServantBase__epv = unsafe { mem::zeroed() };
+static mut impl_Echo_vepv: POA_Echo__vepv = unsafe { mem::zeroed() };
 
 pub fn init_global_structs() -> () {
     // See echo-skepimpl.c for C implementation
@@ -54,14 +57,19 @@ pub fn init_global_structs() -> () {
         impl_Echo_epv._private = null_mut();
         impl_Echo_epv.echoString = Some(impl_Echo_echoString);
 
+        dbg!(impl_Echo_epv);
+
         impl_Echo_base_epv._private = null_mut();
         impl_Echo_base_epv.finalize = Some(impl_Echo__destroy);
         impl_Echo_base_epv.default_POA = None;
 
+        dbg!(impl_Echo_base_epv);
+
         impl_Echo_vepv.Echo_epv = std::ptr::addr_of_mut!(impl_Echo_epv);
         impl_Echo_vepv._base_epv = std::ptr::addr_of_mut!(impl_Echo_base_epv);
+
+        dbg!(impl_Echo_vepv);
     }
-    todo!()
 }
 
 /*
@@ -98,8 +106,20 @@ pub unsafe extern "C" fn impl_Echo__create(
     poa: PortableServer_POA,
     ev: *mut CORBA_Environment,
 ) -> Echo {
-    let new_servant = Box::new(mem::zeroed::<impl_POA_Echo>());
-    todo!()
+    let mut newservant = Box::new(mem::zeroed::<impl_POA_Echo>());
+    newservant.servant.vepv = std::ptr::addr_of_mut!(impl_Echo_vepv);
+    newservant.poa = CORBA_Object_duplicate(poa as CORBA_Object, ev) as PortableServer_POA;
+
+    let pservant = dbg!(Box::into_raw(newservant));
+    POA_Echo__init(pservant as PortableServer_Servant, ev);
+
+    /* ------ init private attributes here ------ */
+    /* ------ ---------- end ------------- ------ */
+
+    let obj_id = PortableServer_POA_activate_object(poa, pservant as PortableServer_Servant, ev);
+    CORBA_free(dbg!(obj_id) as gpointer);
+
+    PortableServer_POA_servant_to_reference(poa, pservant as PortableServer_Servant, ev)
 }
 
 /*
@@ -117,7 +137,12 @@ pub unsafe extern "C" fn impl_Echo__destroy(
 
     CORBA_Object_release(poa_object, ev);
 
-    // Place to do some freeing.
+    // Place to do some freeing of stuff yourself,
+    // in case you have resources living in the servant.
+
+    POA_Echo__fini(servant as PortableServer_Servant, ev);
+
+    drop(Box::from_raw(dbg!(servant)));
 }
 
 #[no_mangle]
