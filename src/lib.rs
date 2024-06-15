@@ -8,7 +8,7 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 pub mod toolkit;
 
-mod echo;
+pub mod echo;
 
 #[cfg(test)]
 mod tests {
