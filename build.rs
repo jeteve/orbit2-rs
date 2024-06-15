@@ -25,10 +25,16 @@ fn main() {
         .allowlist_function("CORBA_ORB_init")
         .allowlist_function("CORBA_ORB_object_to_string")
         .allowlist_function("CORBA_ORB_string_to_object")
+        .allowlist_function("CORBA_ORB_resolve_initial_references")
+        .allowlist_function("PortableServer_POA__get_the_POAManager")
+        .allowlist_function("PortableServer_POAManager_activate")
+        .allowlist_function("CORBA_Object_release")
+        .allowlist_function("CORBA_ORB_run")
         .allowlist_type("CORBA_exception_type")
         .allowlist_type("CORBA_Object")
         .allowlist_item("CORBA_OBJECT_NIL")
         .allowlist_item("NULL")
+        .allowlist_type("PortableServer_POAManager")
         .generate()
         .expect("Unable to generate bindings");
 
@@ -69,7 +75,10 @@ fn main() {
         .allowlist_type("POA_Echo__epv")
         .allowlist_type("POA_Echo__vepv")
         .allowlist_type("POA_Echo")
-        .allowlist_type("PortableServer_POA")
+        .blocklist_item("PortableServer_POA")
+        .blocklist_item("CORBA_Environment")
+        .blocklist_item("CORBA_Object_type")
+        //.allowlist_type("PortableServer_POA")
         .allowlist_type("PortableServer_ServantBase__epv")
         // Note those things need to be defined in the servant code.
         //.allowlist_var("impl_Echo_base_epv")

@@ -10,6 +10,9 @@ use std::{
     mem,
     ptr::{null, null_mut},
 };
+
+use super::super::*;
+
 include!(concat!(env!("OUT_DIR"), "/echo_bindings_impl.rs"));
 
 /* Need to implement this structure:

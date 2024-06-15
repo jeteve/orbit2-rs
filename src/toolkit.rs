@@ -41,6 +41,25 @@ pub fn ignore_if_exception(ev: &mut CORBA_Environment, msg: &str) -> () {
     unsafe { CORBA_exception_free(ev) };
 }
 
+pub fn string_to_corba_char(value: &str) -> *mut CORBA_char {
+    CString::new(value)
+        .expect(&format!("String {} CONTAINS NULL BYTE", value))
+        .into_raw()
+}
+
+pub fn vecs_to_argcv(s: &Vec<String>) -> (i32, Vec<*mut i8>) {
+    let argc = s.len() as i32;
+
+    let mut argv = s
+        .into_iter()
+        .map(|s| CString::new(s.to_owned()).unwrap_or_default())
+        .map(|cs| cs.into_raw())
+        .collect::<Vec<_>>();
+    argv.reserve(1); // Make sure theres always an allocation. Even if s is empty.
+
+    (argc, argv)
+}
+
 pub fn charptr_to_string(value: *mut CORBA_char) -> Option<String> {
     if value.is_null() {
         None

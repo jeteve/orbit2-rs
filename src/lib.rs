@@ -33,6 +33,7 @@ mod tests {
             .map(|s| CString::new(s).unwrap_or_default())
             .map(|cs| cs.into_raw())
             .collect::<Vec<_>>();
+        argv.reserve(1); // Reserve one more, to make sure it's always allocated.
 
         let orb_identifier: CORBA_ORBid = CString::new("orbit-local-mt-orb").unwrap().into_raw();
 
