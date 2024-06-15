@@ -7,9 +7,27 @@
 
 use std::{
     ffi::c_void,
+    mem,
     ptr::{null, null_mut},
 };
 include!(concat!(env!("OUT_DIR"), "/echo_bindings_impl.rs"));
+
+/* Need to implement this structure:
+
+typedef struct {
+POA_Echo servant;
+PortableServer_POA poa;
+   /* ------ add private attributes here ------ */
+   /* ------ ---------- end ------------ ------ */
+} impl_POA_Echo;
+*/
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct impl_POA_Echo {
+    pub servant: POA_Echo,
+    pub poa: PortableServer_POA,
+    // And your private attributes here
+}
 
 /*
 
@@ -43,6 +61,44 @@ pub fn init_global_structs() -> () {
         impl_Echo_vepv.Echo_epv = std::ptr::addr_of_mut!(impl_Echo_epv);
         impl_Echo_vepv._base_epv = std::ptr::addr_of_mut!(impl_Echo_base_epv);
     }
+    todo!()
+}
+
+/*
+    Need to implement the following function:
+*/
+
+/*
+static Echo impl_Echo__create(PortableServer_POA poa, CORBA_Environment *ev)
+{
+Echo retval;
+impl_POA_Echo *newservant;
+PortableServer_ObjectId *objid;
+
+newservant = g_new0(impl_POA_Echo, 1);
+newservant->servant.vepv = &impl_Echo_vepv;
+newservant->poa = (PortableServer_POA) CORBA_Object_duplicate((CORBA_Object)poa, ev);
+POA_Echo__init((PortableServer_Servant)newservant, ev);
+   /* Before servant is going to be activated all
+    * private attributes must be initialized.  */
+
+   /* ------ init private attributes here ------ */
+   /* ------ ---------- end ------------- ------ */
+
+objid = PortableServer_POA_activate_object(poa, newservant, ev);
+CORBA_free(objid);
+retval = PortableServer_POA_servant_to_reference(poa, newservant, ev);
+
+return retval;
+}
+ */
+
+#[no_mangle]
+pub unsafe extern "C" fn impl_Echo__create(
+    poa: PortableServer_POA,
+    ev: *mut CORBA_Environment,
+) -> Echo {
+    let new_servant = Box::new(mem::zeroed::<impl_POA_Echo>());
     todo!()
 }
 
