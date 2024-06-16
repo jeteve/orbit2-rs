@@ -1,9 +1,11 @@
 use std::{
     error::Error,
-    fs::{self, File},
+    fs::{self},
     mem,
     ptr::{addr_of_mut, null_mut},
 };
+
+use orbit2_sys::core::*;
 
 use orbit2_sys::{
     echo::{
@@ -11,9 +13,6 @@ use orbit2_sys::{
         servant::{impl_Echo__create, Echo},
     },
     toolkit::{abort_if_exception, export_object, string_to_corba_char, vecs_to_argcv},
-    CORBA_Environment, CORBA_ORB_init, CORBA_ORB_resolve_initial_references, CORBA_ORB_run,
-    CORBA_Object, CORBA_Object_release, CORBA_exception_init, PortableServer_POA,
-    PortableServer_POAManager_activate, PortableServer_POA__get_the_POAManager, CORBA_ORB,
 };
 
 static mut GLOBAL_ORB: CORBA_ORB = null_mut();

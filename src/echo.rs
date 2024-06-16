@@ -5,7 +5,7 @@
 #![allow(improper_ctypes)]
 #![allow(unused_imports)]
 
-use super::*;
+use crate::core::*;
 
 include!(concat!(env!("OUT_DIR"), "/echo_bindings.rs"));
 

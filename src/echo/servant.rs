@@ -11,9 +11,9 @@ use std::{
     ptr::{null, null_mut},
 };
 
-use toolkit::charptr_to_string;
+use crate::toolkit::charptr_to_string;
 
-use super::super::*;
+use crate::core::*;
 
 include!(concat!(env!("OUT_DIR"), "/echo_bindings_impl.rs"));
 

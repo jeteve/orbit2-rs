@@ -1,10 +1,6 @@
-use super::*;
+use crate::core::*;
 use log::warn;
-use std::{
-    default,
-    ffi::{CStr, CString},
-    ptr::{null, null_mut},
-};
+use std::ffi::{CStr, CString};
 
 pub fn raised_exception(ev: &CORBA_Environment) -> bool {
     ev._major != CORBA_exception_type_CORBA_NO_EXCEPTION
@@ -123,9 +119,7 @@ pub fn import_object(
 
 #[cfg(test)]
 mod tests {
-    use super::super::*;
     use super::*;
-
     fn new_ev() -> CORBA_Environment {
         let mut ev = unsafe { std::mem::zeroed() };
         unsafe { CORBA_exception_init(&mut ev) };
