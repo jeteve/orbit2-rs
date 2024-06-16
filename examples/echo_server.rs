@@ -1,4 +1,6 @@
 use std::{
+    error::Error,
+    fs::{self, File},
     mem,
     ptr::{addr_of_mut, null_mut},
 };
@@ -75,7 +77,7 @@ fn server_activate_service(
     reference
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     println!("Hello, I am a server");
     echo::servant::init_global_structs();
 
@@ -109,5 +111,9 @@ fn main() {
     dbg!(&ref_string);
     assert!(ref_string.is_ok());
 
+    fs::write("echo.ref", ref_string.unwrap())?;
+
     unsafe { CORBA_ORB_run(GLOBAL_ORB, &mut ev) };
+
+    Ok(())
 }
