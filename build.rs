@@ -15,7 +15,7 @@ fn main() {
         .collect::<Vec<_>>();
 
     // Global corba bindings.
-    let bindings = bindgen::Builder::default()
+    let core_bindings = bindgen::Builder::default()
         .header("wrapper.h")
         .clang_args(includes.clone()) // https://stackoverflow.com/questions/64390316/problems-linking-header-files-with-rust-bindgen
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
@@ -40,8 +40,8 @@ fn main() {
 
     let out_path = PathBuf::from(std::env::var("OUT_DIR").unwrap());
 
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
+    core_bindings
+        .write_to_file(out_path.join("core_bindings.rs"))
         .expect("Couldn't write bindings!");
 
     // Echo service binding. Do this for every service

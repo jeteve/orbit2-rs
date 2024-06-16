@@ -4,7 +4,7 @@
 #![allow(dead_code, unused_variables)]
 #![allow(improper_ctypes)]
 #![allow(unused_imports)]
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+include!(concat!(env!("OUT_DIR"), "/core_bindings.rs"));
 
 #[cfg(test)]
 mod tests {
