@@ -51,7 +51,9 @@ fn main() {
         .header("wrapper_echo.h")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .clang_args(includes.clone())
-        .allowlist_function("hfiuewhfiuwhfiuewhf")
+        .allowlist_function("Echo_echoString")
+        .blocklist_item("CORBA_Object_type")
+        .blocklist_item("CORBA_Environment")
         .generate()
         .expect("Unable to generate bindings");
     echo_binding

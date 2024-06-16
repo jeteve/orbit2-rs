@@ -11,6 +11,8 @@ use std::{
     ptr::{null, null_mut},
 };
 
+use toolkit::charptr_to_string;
+
 use super::super::*;
 
 include!(concat!(env!("OUT_DIR"), "/echo_bindings_impl.rs"));
@@ -156,4 +158,5 @@ pub unsafe extern "C" fn impl_Echo_echoString(
 ) -> () {
     // What the method does:
     println!("Hello from echo");
+    println!("Received string={:?}", charptr_to_string(input as *mut i8));
 }

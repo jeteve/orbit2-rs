@@ -4,6 +4,9 @@
 #![allow(dead_code, unused_variables)]
 #![allow(improper_ctypes)]
 #![allow(unused_imports)]
+
+use super::*;
+
 include!(concat!(env!("OUT_DIR"), "/echo_bindings.rs"));
 
 pub mod servant;
