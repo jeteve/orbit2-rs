@@ -73,7 +73,7 @@ fn main() {
         .allowlist_function("PortableServer_POA_activate_object")
         .allowlist_function("PortableServer_POA_servant_to_reference")
         .allowlist_function("POA_Echo__fini")
-        .allowlist_type("Echo")
+        .blocklist_type("Echo")
         .allowlist_type("POA_Echo__epv")
         .allowlist_type("POA_Echo__vepv")
         .allowlist_type("POA_Echo")
@@ -92,6 +92,7 @@ fn main() {
         .write_to_file(out_path.join("echo_bindings_impl.rs"))
         .expect("Couldnt write echo_bindings.rs ");
 
+    // This is for the general (client + server) AND for the server
     cc::Build::new()
         .file("csrc/echo-common.c")
         .file("csrc/echo-skels.c")

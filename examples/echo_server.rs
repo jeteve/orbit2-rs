@@ -5,13 +5,11 @@ use std::{
     ptr::{addr_of_mut, null_mut},
 };
 
-use orbit2_sys::core::*;
+use orbit2_sys::{core::*, service::echo_impl};
 
 use orbit2_sys::{
-    echo::{
-        self,
-        servant::{impl_Echo__create, Echo},
-    },
+    service::echo::Echo,
+    service::echo_impl::impl_Echo__create,
     toolkit::{abort_if_exception, export_object, string_to_corba_char, vecs_to_argcv},
 };
 
@@ -78,7 +76,7 @@ fn server_activate_service(
 
 fn main() -> Result<(), Box<dyn Error>> {
     println!("Hello, I am a server");
-    echo::servant::init_global_structs();
+    echo_impl::init_global_structs();
 
     // No need for that. We can do it in Rust land.
     //let filename = string_to_corba_char("echo.ref");

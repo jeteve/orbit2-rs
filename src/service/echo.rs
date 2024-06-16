@@ -8,5 +8,3 @@
 use crate::core::*;
 
 include!(concat!(env!("OUT_DIR"), "/echo_bindings.rs"));
-
-pub mod servant;

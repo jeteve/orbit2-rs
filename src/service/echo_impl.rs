@@ -14,6 +14,7 @@ use std::{
 use crate::toolkit::charptr_to_string;
 
 use crate::core::*;
+use crate::service::echo::Echo;
 
 include!(concat!(env!("OUT_DIR"), "/echo_bindings_impl.rs"));
 

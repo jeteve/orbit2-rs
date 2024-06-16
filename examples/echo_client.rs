@@ -2,7 +2,7 @@ use std::{error::Error, fs::read_to_string, mem, ptr::addr_of_mut};
 
 use orbit2_sys::core::{CORBA_Environment, CORBA_ORB_init, CORBA_exception_init, CORBA_ORB};
 
-use orbit2_sys::echo::{servant::Echo, Echo_echoString};
+use orbit2_sys::service::echo::{Echo, Echo_echoString};
 use orbit2_sys::toolkit::{abort_if_exception, import_object, string_to_corba_char, vecs_to_argcv};
 
 fn main() -> Result<(), Box<dyn Error>> {
