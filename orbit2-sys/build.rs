@@ -58,9 +58,9 @@ fn main() {
         .header("wrapper_echo.h")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .clang_args(includes.clone())
+        .allowlist_recursively(false)
         .allowlist_function("Echo_echoString")
-        .blocklist_item("CORBA_Object_type")
-        .blocklist_item("CORBA_Environment")
+        .allowlist_type("Echo")
         .generate()
         .expect("Unable to generate bindings");
     echo_binding
@@ -72,20 +72,17 @@ fn main() {
         .header("wrapper_echo_impl.h")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .clang_args(includes.clone())
+        .allowlist_recursively(false)
         .allowlist_function("POA_Echo__fini")
         .allowlist_function("POA_Echo__init")
         .allowlist_type("POA_Echo__epv")
         .allowlist_type("POA_Echo__vepv")
         .allowlist_type("POA_Echo")
-        .blocklist_item("CORBA_.*")
-        .blocklist_item("PortableServer_POA.*")
-        .blocklist_type("Echo")
         .generate()
         .expect("Unable to generate bindings");
     echo_binding_impl
         .write_to_file(out_path.join("echo_bindings_impl.rs"))
         .expect("Couldnt write echo_bindings.rs ");
-
     // This is for the general (client + server) AND for the server
     cc::Build::new()
         .file("csrc/echo-common.c")
