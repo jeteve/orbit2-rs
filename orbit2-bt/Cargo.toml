@@ -8,3 +8,4 @@ bindgen = "0.69.4"
 pkg-config = "0.3.30"
 cc = "1.0.99"
 orbit2-sys = { path = "../orbit2-sys" }
+tempdir = "0.3.7"
