@@ -28,11 +28,13 @@ PortableServer_POA poa;
 } impl_POA_Echo;
 */
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct impl_POA_Echo {
     pub servant: POA_Echo,
     pub poa: PortableServer_POA,
     // And your private attributes here
+    pub name: String,
+    pub counter: u64,
 }
 
 /*
@@ -112,9 +114,20 @@ pub unsafe extern "C" fn impl_Echo__create(
     poa: PortableServer_POA,
     ev: *mut CORBA_Environment,
 ) -> Echo {
-    let mut newservant = Box::new(mem::zeroed::<impl_POA_Echo>());
-    newservant.servant.vepv = std::ptr::addr_of_mut!(impl_Echo_vepv);
-    newservant.poa = CORBA_Object_duplicate(poa as CORBA_Object, ev) as PortableServer_POA;
+    let mut new_subservant: POA_Echo = unsafe { mem::zeroed() };
+    new_subservant.vepv = std::ptr::addr_of_mut!(impl_Echo_vepv);
+
+    let newservant = Box::new(impl_POA_Echo {
+        servant: new_subservant,
+        poa: CORBA_Object_duplicate(poa as CORBA_Object, ev) as PortableServer_POA,
+        name: "chris".to_owned(),
+        counter: 0,
+    });
+
+    //let mut newservant = Box::new(mem::zeroed::<impl_POA_Echo>());
+    //newservant.servant.vepv = std::ptr::addr_of_mut!(impl_Echo_vepv);
+    //newservant.poa = CORBA_Object_duplicate(poa as CORBA_Object, ev) as PortableServer_POA;
+    //newservant.name = "Chris".to_owned();
 
     let pservant = dbg!(Box::into_raw(newservant));
     POA_Echo__init(pservant as PortableServer_Servant, ev);
@@ -153,11 +166,17 @@ pub unsafe extern "C" fn impl_Echo__destroy(
 
 #[no_mangle]
 pub unsafe extern "C" fn impl_Echo_echoString(
-    servant: *mut c_void, // impl_POA_Echo,
+    servant: *mut c_void, //impl_POA_Echo, // impl_POA_Echo,
     input: *const CORBA_char,
     ev: *mut CORBA_Environment,
 ) -> () {
     // What the method does:
-    println!("Hello from echo");
+    let real_servant = servant as *mut impl_POA_Echo;
+    (*real_servant).counter += 1;
+    println!(
+        "Hello from {} # {}",
+        (*real_servant).name,
+        (*real_servant).counter
+    );
     println!("Received string={:?}", charptr_to_string(input as *mut i8));
 }
