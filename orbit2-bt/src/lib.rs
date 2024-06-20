@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{fs, path::PathBuf, process::Output};
 
 #[derive(Debug, Default, Clone)]
 pub struct Builder {
@@ -31,16 +31,28 @@ impl Builder {
         Builder { out_path, ..self }
     }
 
-    fn generate_ccode(self) {
+    fn generate_ccode(self) -> Vec<PathBuf> {
         use std::process::Command;
-        let _ = Command::new(self.orbit_idl)
+        let output = Command::new(self.orbit_idl)
             .arg(format!(
                 "--output-dir={}",
-                self.out_path.to_str().expect("Not unicode dirname")
+                self.out_path.clone().to_str().expect("Not unicode dirname")
             ))
             .arg(self.idl_file)
             .output()
             .expect("Failed to run IDL");
+        assert!(output.status.success());
+        let cfiles = fs::read_dir(self.out_path.clone())
+            .expect("Can list tmp_path")
+            .map(|r| r.expect("Good dir entry"))
+            .map(|d| d.path())
+            .filter(|p| {
+                let ex = p.extension().unwrap_or_default();
+                ex.eq("c")
+            })
+            .collect::<Vec<_>>();
+
+        cfiles
     }
 }
 
@@ -59,7 +71,7 @@ fn find_include_options() -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
+    use std::{fs, str::FromStr};
 
     use tempdir::TempDir;
 
@@ -80,20 +92,25 @@ mod tests {
 
     #[test]
     fn generate_ccode() {
-        let tmp_dir = TempDir::new("example").expect("Cannot create temp dir");
-        let idl_path = tmp_dir.into_path().join("echo.idl");
+        let tmp_path = TempDir::new("example")
+            .expect("Cannot create temp dir")
+            .into_path();
+
+        let idl_path = tmp_path.join("echo.idl");
         fs::write(
-            idl_path,
+            idl_path.clone(),
             "interface Echo {
     void echoString(in string input);
 };",
         )
         .expect("can write example");
 
-        Builder::new()
-            .idl_file("tests/echo.idl".into())
-            .out_path(PathBuf::from("tests"))
+        let cfiles = Builder::new()
+            .idl_file(idl_path.to_str().map(|s| String::from(s)).unwrap())
+            .out_path(tmp_path.clone())
             .generate_ccode();
+        //assert_eq!(cfiles, ["ba", "ba"].map(|s| PathBuf::from_str(s).unwrap()));
+        assert_eq!(cfiles.len(), 3);
     }
 
     #[test]
