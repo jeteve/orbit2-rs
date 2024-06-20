@@ -128,6 +128,8 @@ mod tests {
         (tmp_path, idl_path)
     }
 
+    // see https://doc.rust-lang.org/reference/conditional-compilation.html
+    //#[cfg(all(target_arch = "x86_64", target_os = "linux", target_env = "gnu"))]
     #[test]
     fn test_generate() {
         let (tmp_path, idl_path) = test_fixture();
@@ -138,8 +140,8 @@ mod tests {
 
         // Need to set OUT_DIR to tmp_path
         env::set_var("OUT_DIR", tmp_path);
-        env::set_var("TARGET", "x86_64-unknown-linux-gnu");
-        env::set_var("HOST", "x86_64-unknown-linux-gnu");
+        env::set_var("TARGET", env!("TEST_TARGET"));
+        env::set_var("HOST", env!("TEST_TARGET")); // No cross compilation
         env::set_var("OPT_LEVEL", "0");
 
         //env::set_var("TARGET", "x86_64-unknown-linux-gnu");
