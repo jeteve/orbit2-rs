@@ -161,6 +161,7 @@ pub unsafe extern "C" fn impl_Echo__destroy(
 
     POA_Echo__fini(servant as PortableServer_Servant, ev);
 
+    // To actually free the rust side memory.
     drop(Box::from_raw(dbg!(servant)));
 }
 
