@@ -1,37 +1,41 @@
 use std::{fs, path::PathBuf, process::Output};
 
 #[derive(Debug, Default, Clone)]
-pub struct Builder {
+pub struct CommonBuilder {
     service_name: String,
     out_path: PathBuf,
     idl_file: String,
     orbit_idl: String,
 }
 
-impl Builder {
+impl CommonBuilder {
     pub fn new() -> Self {
-        Builder {
+        CommonBuilder {
             orbit_idl: "orbit-idl-2".to_owned(),
             ..Default::default()
         }
     }
 
     pub fn service_name(self, service_name: String) -> Self {
-        Builder {
+        CommonBuilder {
             service_name,
             ..self
         }
     }
 
     pub fn idl_file(self, idl_file: String) -> Self {
-        Builder { idl_file, ..self }
+        CommonBuilder { idl_file, ..self }
     }
 
     pub fn out_path(self, out_path: PathBuf) -> Self {
-        Builder { out_path, ..self }
+        CommonBuilder { out_path, ..self }
     }
 
-    fn generate_ccode(self) -> Vec<PathBuf> {
+    pub fn generate() {
+        todo!()
+    }
+
+    fn generate_common_ccode(self) -> Vec<PathBuf> {
         use std::process::Command;
         let output = Command::new(self.orbit_idl)
             .arg(format!(
@@ -48,7 +52,7 @@ impl Builder {
             .map(|d| d.path())
             .filter(|p| {
                 let ex = p.extension().unwrap_or_default();
-                ex.eq("c")
+                ex.eq("c") || ex.eq("h")
             })
             .collect::<Vec<_>>();
 
@@ -78,14 +82,16 @@ mod tests {
     use super::*;
     #[test]
     fn base() {
-        assert_eq!(Builder::new().service_name, "");
-        assert_eq!(Builder::new().orbit_idl, "orbit-idl-2");
+        assert_eq!(CommonBuilder::new().service_name, "");
+        assert_eq!(CommonBuilder::new().orbit_idl, "orbit-idl-2");
     }
 
     #[test]
-    fn servive_name() {
+    fn service_name() {
         assert_eq!(
-            Builder::default().service_name("foo".into()).service_name,
+            CommonBuilder::default()
+                .service_name("foo".into())
+                .service_name,
             "foo"
         );
     }
@@ -105,12 +111,21 @@ mod tests {
         )
         .expect("can write example");
 
-        let cfiles = Builder::new()
+        let mut cfiles = CommonBuilder::new()
             .idl_file(idl_path.to_str().map(|s| String::from(s)).unwrap())
             .out_path(tmp_path.clone())
-            .generate_ccode();
+            .generate_common_ccode();
+
+        //assert!( cfiles.iter().zip())
+        let filenames = vec!["echo-common.c", "echo-skels.c", "echo-stubs.c", "echo.h"];
+        cfiles.sort();
         //assert_eq!(cfiles, ["ba", "ba"].map(|s| PathBuf::from_str(s).unwrap()));
-        assert_eq!(cfiles.len(), 3);
+        assert!(cfiles
+            .iter()
+            .zip(filenames.iter())
+            .all(|(p, &s)| p.ends_with(s)));
+
+        assert_eq!(cfiles.len(), 4);
     }
 
     #[test]
