@@ -1,5 +1,29 @@
 use std::{fs, path::PathBuf};
 
+use bindgen::BindgenError;
+
+#[derive(Debug)]
+pub enum Error {
+    Bingen(BindgenError),
+    Io(std::io::Error),
+    NoHeaderFound,
+    BadPathBuf(PathBuf),
+}
+
+impl From<BindgenError> for Error {
+    fn from(value: BindgenError) -> Self {
+        Error::Bingen(value)
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(value: std::io::Error) -> Self {
+        Error::Io(value)
+    }
+}
+
+pub type Result<T> = core::result::Result<T, Error>;
+
 #[derive(Debug, Default, Clone)]
 pub struct CommonBuilder {
     service_name: String,
@@ -35,8 +59,9 @@ impl CommonBuilder {
         CommonBuilder { out_path, ..self }
     }
 
-    pub fn generate(&self) {
-        let cfiles = self.generate_common_ccode();
+    /// Note this can panic! as it uses [`cc::Build`]
+    pub fn generate(&self) -> Result<()> {
+        let cfiles = self.generate_common_ccode()?;
 
         let mut cc = cc::Build::new();
         let cc = cfiles.iter().fold(&mut cc, |cc, f| cc.file(f));
@@ -45,10 +70,30 @@ impl CommonBuilder {
             .includes(self.includes.clone())
             .compile(&format!("{}_common", self.service_name));
 
-        ()
+        // Time to do some bindgen stuff.
+        let the_header = cfiles
+            .iter()
+            .filter(|f| f.extension().unwrap_or_default().eq("h"))
+            .take(1)
+            .next()
+            .ok_or(Error::NoHeaderFound)?;
+
+        let _bindgen = bindgen::Builder::default()
+            .header(
+                the_header
+                    .to_str()
+                    .ok_or(Error::BadPathBuf(the_header.clone()))?
+                    .to_string(),
+            )
+            .allowlist_recursively(false)
+            .clang_args(self.includes.iter().map(|p| format!("-I{}", p.display())))
+            .allowlist_item("POA_Echo.*")
+            .generate()?;
+
+        Ok(())
     }
 
-    fn generate_common_ccode(&self) -> Vec<PathBuf> {
+    fn generate_common_ccode(&self) -> Result<Vec<PathBuf>> {
         use std::process::Command;
         let output = Command::new(self.orbit_idl.clone())
             .arg(format!(
@@ -56,18 +101,22 @@ impl CommonBuilder {
                 self.out_path.clone().to_str().expect("Not unicode dirname")
             ))
             .arg(self.idl_file.clone())
-            .output()
-            .expect("Failed to run IDL");
+            .output()?;
+
         assert!(output.status.success());
-        let cfiles = fs::read_dir(self.out_path.clone())
-            .expect("Can list tmp_path")
-            .map(|r| r.expect("Good dir entry"))
-            .map(|d| d.path())
+        let cfiles: Result<_> = fs::read_dir(self.out_path.clone())?
+            .map(|entry: std::result::Result<fs::DirEntry, std::io::Error>| entry.map(|d| d.path()))
             .filter(|p| {
-                let ex = p.extension().unwrap_or_default();
-                ex.eq("c") || ex.eq("h")
+                if p.is_ok() {
+                    let p = p.as_ref().unwrap();
+                    let ex = p.extension().unwrap_or_default();
+                    ex.eq("c") || ex.eq("h")
+                } else {
+                    false
+                }
             })
-            .collect::<Vec<_>>();
+            .map(|r| r.map_err(|e| Error::Io(e)))
+            .collect::<Result<Vec<PathBuf>>>();
 
         cfiles
     }
@@ -141,17 +190,19 @@ mod tests {
         env::set_var("OPT_LEVEL", "0");
 
         //env::set_var("TARGET", "x86_64-unknown-linux-gnu");
-        builder.generate();
+        assert!(builder.generate().is_ok());
     }
 
     #[test]
     fn generate_ccode() {
         let (tmp_path, idl_path) = test_fixture();
 
-        let mut cfiles = CommonBuilder::new()
+        let cfiles = CommonBuilder::new()
             .idl_file(idl_path.clone())
             .out_path(tmp_path.clone())
             .generate_common_ccode();
+        assert!(cfiles.is_ok());
+        let mut cfiles = cfiles.unwrap();
 
         //assert!( cfiles.iter().zip())
         let filenames = vec!["echo-common.c", "echo-skels.c", "echo-stubs.c", "echo.h"];
