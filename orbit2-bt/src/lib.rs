@@ -1,8 +1,4 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
-    process::Output,
-};
+use std::{fs, path::PathBuf};
 
 #[derive(Debug, Default, Clone)]
 pub struct CommonBuilder {
@@ -92,7 +88,7 @@ fn find_orbit2_includes() -> Vec<PathBuf> {
 
 #[cfg(test)]
 mod tests {
-    use std::{env, fs, str::FromStr};
+    use std::{env, fs};
 
     use tempdir::TempDir;
 

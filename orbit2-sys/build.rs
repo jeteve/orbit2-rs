@@ -1,6 +1,4 @@
-use std::env;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 fn main() {
     //assert_eq!(env::var("HOST"), Ok("foo".into()));
