@@ -1,7 +1,10 @@
+use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 
 fn main() {
+    //assert_eq!(env::var("HOST"), Ok("foo".into()));
+
     let lib = pkg_config::Config::new()
         .atleast_version("2.14.19")
         .print_system_cflags(true)

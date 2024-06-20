@@ -1,17 +1,25 @@
-use std::{fs, path::PathBuf, process::Output};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::Output,
+};
 
 #[derive(Debug, Default, Clone)]
 pub struct CommonBuilder {
     service_name: String,
     out_path: PathBuf,
-    idl_file: String,
+    idl_file: PathBuf,
     orbit_idl: String,
+    includes: Vec<PathBuf>,
 }
 
 impl CommonBuilder {
     pub fn new() -> Self {
+        let includes = find_orbit2_includes();
+
         CommonBuilder {
             orbit_idl: "orbit-idl-2".to_owned(),
+            includes,
             ..Default::default()
         }
     }
@@ -23,7 +31,7 @@ impl CommonBuilder {
         }
     }
 
-    pub fn idl_file(self, idl_file: String) -> Self {
+    pub fn idl_file(self, idl_file: PathBuf) -> Self {
         CommonBuilder { idl_file, ..self }
     }
 
@@ -31,18 +39,27 @@ impl CommonBuilder {
         CommonBuilder { out_path, ..self }
     }
 
-    pub fn generate() {
-        todo!()
+    pub fn generate(&self) {
+        let cfiles = self.generate_common_ccode();
+
+        let mut cc = cc::Build::new();
+        let cc = cfiles.iter().fold(&mut cc, |cc, f| cc.file(f));
+
+        cc.include(self.out_path.clone())
+            .includes(self.includes.clone())
+            .compile(&format!("{}_common", self.service_name));
+
+        ()
     }
 
-    fn generate_common_ccode(self) -> Vec<PathBuf> {
+    fn generate_common_ccode(&self) -> Vec<PathBuf> {
         use std::process::Command;
-        let output = Command::new(self.orbit_idl)
+        let output = Command::new(self.orbit_idl.clone())
             .arg(format!(
                 "--output-dir={}",
                 self.out_path.clone().to_str().expect("Not unicode dirname")
             ))
-            .arg(self.idl_file)
+            .arg(self.idl_file.clone())
             .output()
             .expect("Failed to run IDL");
         assert!(output.status.success());
@@ -60,7 +77,7 @@ impl CommonBuilder {
     }
 }
 
-fn find_include_options() -> Vec<String> {
+fn find_orbit2_includes() -> Vec<PathBuf> {
     pkg_config::Config::new()
         .atleast_version("2.14.19")
         .print_system_cflags(true)
@@ -68,14 +85,14 @@ fn find_include_options() -> Vec<String> {
         // Expect is fine as this has orbit2-sys as a dependency
         .expect("Cannot find ORBit-2.0 with pkg_config")
         .include_paths
-        .iter()
-        .map(|p| format!("-I{}", p.display()))
-        .collect::<Vec<_>>()
+    //.iter()
+    //.map(|p| format!("-I{}", p.display()))
+    //.collect::<Vec<_>>()
 }
 
 #[cfg(test)]
 mod tests {
-    use std::{fs, str::FromStr};
+    use std::{env, fs, str::FromStr};
 
     use tempdir::TempDir;
 
@@ -96,12 +113,10 @@ mod tests {
         );
     }
 
-    #[test]
-    fn generate_ccode() {
+    fn test_fixture() -> (PathBuf, PathBuf) {
         let tmp_path = TempDir::new("example")
             .expect("Cannot create temp dir")
             .into_path();
-
         let idl_path = tmp_path.join("echo.idl");
         fs::write(
             idl_path.clone(),
@@ -110,9 +125,33 @@ mod tests {
 };",
         )
         .expect("can write example");
+        (tmp_path, idl_path)
+    }
+
+    #[test]
+    fn test_generate() {
+        let (tmp_path, idl_path) = test_fixture();
+
+        let builder = CommonBuilder::new()
+            .idl_file(idl_path.clone())
+            .out_path(tmp_path.clone());
+
+        // Need to set OUT_DIR to tmp_path
+        env::set_var("OUT_DIR", tmp_path);
+        env::set_var("TARGET", "x86_64-unknown-linux-gnu");
+        env::set_var("HOST", "x86_64-unknown-linux-gnu");
+        env::set_var("OPT_LEVEL", "0");
+
+        //env::set_var("TARGET", "x86_64-unknown-linux-gnu");
+        builder.generate();
+    }
+
+    #[test]
+    fn generate_ccode() {
+        let (tmp_path, idl_path) = test_fixture();
 
         let mut cfiles = CommonBuilder::new()
-            .idl_file(idl_path.to_str().map(|s| String::from(s)).unwrap())
+            .idl_file(idl_path.clone())
             .out_path(tmp_path.clone())
             .generate_common_ccode();
 
@@ -129,7 +168,7 @@ mod tests {
     }
 
     #[test]
-    fn find_includes() {
-        assert!(find_include_options().len() > 0);
+    fn find_includes_test() {
+        assert!(find_orbit2_includes().len() > 0);
     }
 }
