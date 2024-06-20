@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, process::Output};
 
 use bindgen::BindgenError;
 
@@ -8,6 +8,7 @@ pub enum Error {
     Io(std::io::Error),
     NoHeaderFound,
     BadPathBuf(PathBuf),
+    CommandFailure(Output),
 }
 
 impl From<BindgenError> for Error {
@@ -103,7 +104,10 @@ impl CommonBuilder {
             .arg(self.idl_file.clone())
             .output()?;
 
-        assert!(output.status.success());
+        if !output.status.success() {
+            return Err(Error::CommandFailure(output));
+        }
+
         let cfiles: Result<_> = fs::read_dir(self.out_path.clone())?
             .map(|entry: std::result::Result<fs::DirEntry, std::io::Error>| entry.map(|d| d.path()))
             .filter(|p| {
