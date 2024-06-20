@@ -91,6 +91,8 @@ impl CommonBuilder {
             .allowlist_item("POA_Echo.*")
             .generate()?;
 
+        // TODO output the bindgen at the right place.
+
         Ok(())
     }
 
