@@ -108,7 +108,7 @@ impl CommonBuilder {
             .allowlist_recursively(false)
             .clang_args(self.includes.iter().map(|p| format!("-I{}", p.display())))
             .allowlist_function(format!("{}_.*", self.service_name))
-            .allowlist_type(format!("{}", self.service_name))
+            .allowlist_type(format!("{}(?:_[[:alpha:]].*)?", self.service_name))
             .generate()?;
 
         // output the bindgen at the right place.
