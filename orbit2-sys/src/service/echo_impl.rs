@@ -159,6 +159,8 @@ pub unsafe extern "C" fn impl_Echo__destroy(
     // Place to do some freeing of stuff yourself,
     // in case you have resources living in the servant.
 
+    // Eventually calls PortableServer_ServantBase__fini
+    // which does this:
     POA_Echo__fini(servant as PortableServer_Servant, ev);
 
     // To actually free the rust side memory.
