@@ -69,6 +69,8 @@ impl CommonBuilder {
 
         cc.include(self.out_path.clone())
             .includes(self.includes.clone())
+            .flag("-Wno-unused-const-variable")
+            .flag("-Wno-unused-parameter")
             .compile(&format!("{}_common", self.service_name));
 
         // Time to do some bindgen stuff.
