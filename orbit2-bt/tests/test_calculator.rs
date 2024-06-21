@@ -2,7 +2,7 @@ mod common;
 #[test]
 fn test_generate_calculator() -> Result<(), Box<dyn std::error::Error>> {
     let tmp_path = tempdir::TempDir::new("test_calculator")?.into_path();
-    let idl_path = tmp_path.join("echo.idl");
+    let idl_path = tmp_path.join("calculator.idl");
     std::fs::write(
         idl_path.clone(),
         "interface Calculator
