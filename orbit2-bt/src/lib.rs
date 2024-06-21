@@ -13,6 +13,7 @@ pub enum Error {
     NoHeaderFound,
     BadPathBuf(PathBuf),
     CommandFailure(Output),
+    CompileFailure(cc::Error),
 }
 
 impl std::fmt::Display for Error {
@@ -33,6 +34,12 @@ impl From<BindgenError> for Error {
 impl From<std::io::Error> for Error {
     fn from(value: std::io::Error) -> Self {
         Error::Io(value)
+    }
+}
+
+impl From<cc::Error> for Error {
+    fn from(value: cc::Error) -> Self {
+        Error::CompileFailure(value)
     }
 }
 
@@ -82,13 +89,17 @@ impl CommonBuilder {
         let cfiles = self.generate_common_ccode()?;
 
         let mut cc = cc::Build::new();
-        let cc = cfiles.iter().fold(&mut cc, |cc, f| cc.file(f));
+        let cc = cfiles
+            .iter()
+            .filter(|f| f.extension().unwrap_or_default().eq("c"))
+            .fold(&mut cc, |cc, f| cc.file(f));
 
         cc.include(self.out_path.clone())
+            .cargo_debug(true)
             .includes(self.includes.clone())
             .flag("-Wno-unused-const-variable")
             .flag("-Wno-unused-parameter")
-            .compile(&format!("{}_common", self.service_name));
+            .try_compile(&format!("{}_common", self.service_name))?;
 
         // Time to do some bindgen stuff.
         let the_header = cfiles
