@@ -30,5 +30,44 @@ fn test_generate_echo() -> Result<(), Box<dyn Error>> {
         tmp_path.join("Echo_binding.rs").as_os_str()
     );
 
+    // Parse the file to check the symbols inside
+    let bytes = fs::read(r.binding_file)?;
+    let binding_code = std::str::from_utf8(&bytes)?;
+    let syntax = syn::parse_file(binding_code)?;
+
+    dbg!(&syntax);
+
+    let mut types = syntax
+        .items
+        .iter()
+        .flat_map(|i| match i {
+            syn::Item::Type(s) => Some(s),
+            _ => None,
+        })
+        .map(|s| s.ident.to_string())
+        //.filter(|s| s.starts_with("Echo"))
+        .collect::<Vec<_>>();
+    types.sort();
+
+    assert_eq!(types, vec!["Echo"]);
+
+    let mut foreign_fns = syntax
+        .items
+        .iter()
+        .flat_map(|i| match i {
+            syn::Item::ForeignMod(m) => Some(m),
+            _ => None,
+        })
+        .flat_map(|fm| &fm.items)
+        .flat_map(|i| match i {
+            syn::ForeignItem::Fn(ff) => Some(ff),
+            _ => None,
+        })
+        .map(|ff| ff.sig.ident.to_string())
+        .collect::<Vec<_>>();
+
+    foreign_fns.sort();
+    assert_eq!(foreign_fns, vec!["Echo_echoString"]);
+
     Ok(())
 }
