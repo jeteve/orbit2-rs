@@ -1,4 +1,8 @@
-use std::{fs, path::PathBuf, process::Output};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::Output,
+};
 
 use bindgen::BindgenError;
 
@@ -10,6 +14,15 @@ pub enum Error {
     BadPathBuf(PathBuf),
     CommandFailure(Output),
 }
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+// Requested for Result<_, Box<dyn Error>> trait objects
+// Nothing to implement as Display and Debug are implemented already.
+impl std::error::Error for Error {}
 
 impl From<BindgenError> for Error {
     fn from(value: BindgenError) -> Self {
@@ -25,6 +38,10 @@ impl From<std::io::Error> for Error {
 
 pub type Result<T> = core::result::Result<T, Error>;
 
+pub struct BindingCode {
+    pub binding_file: PathBuf,
+}
+
 #[derive(Debug, Default, Clone)]
 pub struct CommonBuilder {
     service_name: String,
@@ -35,33 +52,33 @@ pub struct CommonBuilder {
 }
 
 impl CommonBuilder {
-    pub fn new() -> Self {
+    pub fn new(service_name: &str) -> Self {
         let includes = find_orbit2_includes();
 
         CommonBuilder {
             orbit_idl: "orbit-idl-2".to_owned(),
             includes,
+            service_name: service_name.to_owned(),
             ..Default::default()
         }
     }
 
-    pub fn service_name(self, service_name: String) -> Self {
+    pub fn idl_file(self, idl_file: &Path) -> Self {
         CommonBuilder {
-            service_name,
+            idl_file: idl_file.to_owned(),
             ..self
         }
     }
 
-    pub fn idl_file(self, idl_file: PathBuf) -> Self {
-        CommonBuilder { idl_file, ..self }
-    }
-
-    pub fn out_path(self, out_path: PathBuf) -> Self {
-        CommonBuilder { out_path, ..self }
+    pub fn out_path(self, out_path: &Path) -> Self {
+        CommonBuilder {
+            out_path: out_path.to_owned(),
+            ..self
+        }
     }
 
     /// Note this can panic! as it uses [`cc::Build`]
-    pub fn generate(&self) -> Result<()> {
+    pub fn generate(&self) -> Result<BindingCode> {
         let cfiles = self.generate_common_ccode()?;
 
         let mut cc = cc::Build::new();
@@ -81,7 +98,7 @@ impl CommonBuilder {
             .next()
             .ok_or(Error::NoHeaderFound)?;
 
-        let _bindgen = bindgen::Builder::default()
+        let bindgen = bindgen::Builder::default()
             .header(
                 the_header
                     .to_str()
@@ -90,12 +107,16 @@ impl CommonBuilder {
             )
             .allowlist_recursively(false)
             .clang_args(self.includes.iter().map(|p| format!("-I{}", p.display())))
-            .allowlist_item("POA_Echo.*")
+            .allowlist_item(format!("POA_{}.*", self.service_name))
             .generate()?;
 
-        // TODO output the bindgen at the right place.
+        // output the bindgen at the right place.
+        let binding_file = self
+            .out_path
+            .join(format!("{}_binding.rs", self.service_name));
+        bindgen.write_to_file(&binding_file)?;
 
-        Ok(())
+        Ok(BindingCode { binding_file })
     }
 
     fn generate_common_ccode(&self) -> Result<Vec<PathBuf>> {
@@ -152,18 +173,8 @@ mod tests {
     use super::*;
     #[test]
     fn base() {
-        assert_eq!(CommonBuilder::new().service_name, "");
-        assert_eq!(CommonBuilder::new().orbit_idl, "orbit-idl-2");
-    }
-
-    #[test]
-    fn service_name() {
-        assert_eq!(
-            CommonBuilder::default()
-                .service_name("foo".into())
-                .service_name,
-            "foo"
-        );
+        assert_eq!(CommonBuilder::new("").service_name, "");
+        assert_eq!(CommonBuilder::new("").orbit_idl, "orbit-idl-2");
     }
 
     fn test_fixture() -> (PathBuf, PathBuf) {
@@ -187,27 +198,34 @@ mod tests {
     fn test_generate() {
         let (tmp_path, idl_path) = test_fixture();
 
-        let builder = CommonBuilder::new()
-            .idl_file(idl_path.clone())
-            .out_path(tmp_path.clone());
+        let builder = CommonBuilder::new("Echo")
+            .idl_file(&idl_path)
+            .out_path(&tmp_path);
 
         // Need to set OUT_DIR to tmp_path
-        env::set_var("OUT_DIR", tmp_path);
+        env::set_var("OUT_DIR", tmp_path.as_os_str());
         env::set_var("TARGET", env!("TEST_TARGET"));
         env::set_var("HOST", env!("TEST_TARGET")); // No cross compilation
         env::set_var("OPT_LEVEL", "0");
 
         //env::set_var("TARGET", "x86_64-unknown-linux-gnu");
-        assert!(builder.generate().is_ok());
+        let binding_res = builder.generate();
+        assert!(binding_res.is_ok());
+
+        let binding_code = binding_res.unwrap();
+        assert_eq!(
+            binding_code.binding_file.as_os_str(),
+            tmp_path.join("Echo_binding.rs").as_os_str()
+        );
     }
 
     #[test]
     fn generate_ccode() {
         let (tmp_path, idl_path) = test_fixture();
 
-        let cfiles = CommonBuilder::new()
-            .idl_file(idl_path.clone())
-            .out_path(tmp_path.clone())
+        let cfiles = CommonBuilder::new("Echo")
+            .idl_file(&idl_path)
+            .out_path(&tmp_path)
             .generate_common_ccode();
         assert!(cfiles.is_ok());
         let mut cfiles = cfiles.unwrap();
