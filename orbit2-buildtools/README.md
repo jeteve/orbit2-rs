@@ -11,9 +11,12 @@ cargo new --lib $PROJECT_IDLS_NAME
 cd $PROJECT_IDLS_NAME
 ```
 
-## Depends on this, in your `Cargo.toml`
+## Depends on this, in your `Cargo.toml`, as well as orbit2-sys as a standard dependency
 
 ```cargo
+[dependencies]
+orbit2-sys = ">=0.0.1"
+
 [build-dependencies]
 orbit2-buildtools = ">=0.0.1"
 ```
@@ -57,3 +60,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 ```
+
+## Structure the generated code in your lib.rs (or a submodule if you wish too)
+
+```rust
+
+use orbit2_sys::core::*;
+include!(env!("ECHO_IDL_BINDING"));
+
+```
+
+And that's it. Now you can use your module in your client and server applications.
