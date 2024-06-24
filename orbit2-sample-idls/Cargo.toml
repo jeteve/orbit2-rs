@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+orbit2-sys = { path = "../orbit2-sys" }
 
 [build-dependencies]
 orbit2-buildtools = { path = "../orbit2-buildtools" }

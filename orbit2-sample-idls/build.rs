@@ -12,8 +12,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .generate()?;
 
     println!(
-        "cargo:rustc-env=ECHO_IDL_BINDING={:?}",
-        r.binding_file.as_path()
+        "cargo:rustc-env=ECHO_IDL_BINDING={}",
+        r.binding_file.as_path().to_str().unwrap()
     );
 
     Ok(())
