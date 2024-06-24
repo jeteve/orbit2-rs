@@ -15,7 +15,7 @@ fn test_generate_calculator() -> Result<(), Box<dyn std::error::Error>> {
     // These would be set by the cargo build framework
     common::set_env_vars(&tmp_path);
 
-    let r = orbit2_bt::CommonBuilder::new("Calculator")
+    let r = orbit2_buildtools::CommonBuilder::new("Calculator")
         .idl_file(&idl_path)
         .out_path(&tmp_path)
         .generate()?;

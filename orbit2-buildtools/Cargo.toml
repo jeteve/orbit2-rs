@@ -1,0 +1,14 @@
+[package]
+name = "orbit2-buildtools"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bindgen = ">=0.69.4"
+pkg-config = ">=0.3.30"
+cc = ">=1.0.99"
+# orbit2-sys = { path = "../orbit2-sys" }
+tempdir = ">=0.3.7"
+
+[dev-dependencies]
+syn = "2.0.67"

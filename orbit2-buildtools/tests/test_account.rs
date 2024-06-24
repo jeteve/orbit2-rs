@@ -15,7 +15,7 @@ fn test_generate_account() -> Result<(), Box<dyn std::error::Error>> {
     // These would be set by the cargo build framework
     common::set_env_vars(&tmp_path);
 
-    let r = orbit2_bt::CommonBuilder::new("Account")
+    let r = orbit2_buildtools::CommonBuilder::new("Account")
         .idl_file(&idl_path)
         .out_path(&tmp_path)
         .generate()?;

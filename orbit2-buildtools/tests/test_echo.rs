@@ -1,6 +1,6 @@
 use std::{error::Error, fs};
 
-use orbit2_bt::CommonBuilder;
+use orbit2_buildtools::CommonBuilder;
 use tempdir::TempDir;
 
 mod common;

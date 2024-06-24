@@ -7,6 +7,6 @@ edition = "2021"
 log = ">=0.4.21"
 
 [build-dependencies]
-bindgen = "0.69.4"
-pkg-config = "0.3.30"
-cc = "1.0.99"
+bindgen = ">=0.69.4"
+pkg-config = ">=0.3.30"
+cc = ">=1.0.99"
