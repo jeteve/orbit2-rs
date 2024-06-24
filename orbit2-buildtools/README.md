@@ -46,6 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let out_path = PathBuf::from(std::env::var("OUT_DIR").unwrap());
 
     // generate the C code plus the Rust binding
+    // Note the name of the service is the toplevel name in your IDL
     let r = CommonBuilder::new("Echo")
         .idl_file(&idl_path)
         .out_path(&out_path)
