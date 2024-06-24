@@ -7,7 +7,8 @@
             "extensions": [
                 "swellaby.rust-pack",
                 "ms-vscode.cpptools",
-                "RTI.omg-idl"
+                "RTI.omg-idl",
+                "DavidAnson.vscode-markdownlint"
             ]
         }
     }

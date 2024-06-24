@@ -1,12 +1,12 @@
-# Notes.
+# Notes
 
 ## Modules
 
 ### orbit2-sys
 
-The orbit2::core::* types and binding to the orbit2 C library
+The orbit2_sys::core::* types and binding to the orbit2 C library
 
-### orbit2-bt
+### orbit2-buildtools
 
 The orbit2 build tools, to enable building:
 
