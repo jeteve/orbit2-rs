@@ -1,3 +1,4 @@
 interface Echo {
+    void echoAString(in string input);
     void echoString(in string input);
 };

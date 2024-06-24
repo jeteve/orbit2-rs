@@ -13,6 +13,7 @@ fn test_generate_echo() -> Result<(), Box<dyn Error>> {
         idl_path.clone(),
         "interface Echo {
     void echoString(in string input);
+    void echoSimpleString(in string input);
 };",
     )?;
 
@@ -39,7 +40,10 @@ fn test_generate_echo() -> Result<(), Box<dyn Error>> {
     assert_eq!(types, vec!["Echo"]);
 
     let foreign_fns = common::foreign_fns(&syntax);
-    assert_eq!(foreign_fns, vec!["Echo_echoString"]);
+    assert_eq!(
+        foreign_fns,
+        vec!["Echo_echoSimpleString", "Echo_echoString"]
+    );
 
     Ok(())
 }
