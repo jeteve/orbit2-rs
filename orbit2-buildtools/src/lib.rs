@@ -95,7 +95,7 @@ impl CommonBuilder {
             .fold(&mut cc, |cc, f| cc.file(f));
 
         cc.include(self.out_path.clone())
-            .cargo_debug(true)
+            //.cargo_debug(true)
             .includes(self.includes.clone())
             .flag("-Wno-unused-const-variable")
             .flag("-Wno-unused-parameter")

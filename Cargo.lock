@@ -198,6 +198,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "orbit2-sample-idls"
+version = "0.1.0"
+dependencies = [
+ "orbit2-buildtools",
+]
+
+[[package]]
 name = "orbit2-sys"
 version = "0.1.0"
 dependencies = [

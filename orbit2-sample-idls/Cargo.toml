@@ -1,0 +1,9 @@
+[package]
+name = "orbit2-sample-idls"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[build-dependencies]
+orbit2-buildtools = { path = "../orbit2-buildtools" }
