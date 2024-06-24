@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut ev: CORBA_Environment = unsafe { mem::zeroed() };
     unsafe { CORBA_exception_init(&mut ev) };
 
-    let (mut argc, mut argv) = vecs_to_argcv(&vec!["--foo".to_owned()]);
+    let (mut argc, mut argv) = vecs_to_argcv(&["--foo".to_owned()]);
     let global_orb: CORBA_ORB = unsafe {
         CORBA_ORB_init(
             addr_of_mut!(argc),

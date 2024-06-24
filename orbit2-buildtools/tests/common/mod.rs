@@ -35,7 +35,7 @@ pub(crate) fn foreign_fns(syntax: &syn::File) -> Vec<String> {
     foreign_fns
 }
 
-pub(crate) fn set_env_vars(tmp_path: &std::path::Path) -> () {
+pub(crate) fn set_env_vars(tmp_path: &std::path::Path) {
     // These would be set by the cargo build framework
     env::set_var("OUT_DIR", tmp_path.as_os_str());
     env::set_var("TARGET", env!("TEST_TARGET"));

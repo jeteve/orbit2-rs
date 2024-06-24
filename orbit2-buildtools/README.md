@@ -15,10 +15,10 @@ cd $PROJECT_IDLS_NAME
 
 ```cargo
 [dependencies]
-orbit2-sys = ">=0.0.1"
+orbit2-sys = ">=0.1.0"
 
 [build-dependencies]
-orbit2-buildtools = ">=0.0.1"
+orbit2-buildtools = ">=0.1.0"
 ```
 
 ## Add your idls in 'static'

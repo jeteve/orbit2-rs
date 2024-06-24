@@ -1,0 +1,8 @@
+[package]
+name = "orbit2"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+orbit2-sys = { path = "../orbit2-sys" }
+orbit2-sample-idls = { path = "../orbit2-sample-idls" }

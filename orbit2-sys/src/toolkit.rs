@@ -18,7 +18,7 @@ pub fn raised_exception_is_a(ev: &mut CORBA_Environment, ex: &str) -> bool {
 }
 
 /// panic! if an exception is in the given environment
-pub fn abort_if_exception(ev: &mut CORBA_Environment, msg: &str) -> () {
+pub fn abort_if_exception(ev: &mut CORBA_Environment, msg: &str) {
     if !raised_exception(ev) {
         return;
     }
@@ -27,7 +27,7 @@ pub fn abort_if_exception(ev: &mut CORBA_Environment, msg: &str) -> () {
     })
 }
 
-pub fn ignore_if_exception(ev: &mut CORBA_Environment, msg: &str) -> () {
+pub fn ignore_if_exception(ev: &mut CORBA_Environment, msg: &str) {
     if !raised_exception(ev) {
         return;
     }
@@ -39,15 +39,15 @@ pub fn ignore_if_exception(ev: &mut CORBA_Environment, msg: &str) -> () {
 
 pub fn string_to_corba_char(value: &str) -> *mut CORBA_char {
     CString::new(value)
-        .expect(&format!("String {} CONTAINS NULL BYTE", value))
+        .unwrap_or_else(|_| panic!("String {} CONTAINS NULL BYTE", value))
         .into_raw()
 }
 
-pub fn vecs_to_argcv(s: &Vec<String>) -> (i32, Vec<*mut i8>) {
+pub fn vecs_to_argcv(s: &[String]) -> (i32, Vec<*mut i8>) {
     let argc = s.len() as i32;
 
     let mut argv = s
-        .into_iter()
+        .iter()
         .map(|s| CString::new(s.to_owned()).unwrap_or_default())
         .map(|cs| cs.into_raw())
         .collect::<Vec<_>>();
@@ -56,6 +56,7 @@ pub fn vecs_to_argcv(s: &Vec<String>) -> (i32, Vec<*mut i8>) {
     (argc, argv)
 }
 
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub fn charptr_to_string(value: *mut CORBA_char) -> Option<String> {
     if value.is_null() {
         None
@@ -79,11 +80,17 @@ pub fn exception_string(ev: &mut CORBA_Environment) -> Option<String> {
     }
 }
 
+/// # Safety
+/// Any null pointer given will cause panic
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub fn export_object(
     orb: CORBA_ORB,
     servant: CORBA_Object,
     ev: &mut CORBA_Environment,
 ) -> Result<String, String> {
+    assert!(!servant.is_null());
+
+    #[allow(clippy::not_unsafe_ptr_arg_deref)]
     let string = unsafe { CORBA_ORB_object_to_string(orb, servant, ev) };
     if raised_exception(ev) {
         Err(exception_string(ev).unwrap_or_default())
@@ -92,12 +99,15 @@ pub fn export_object(
     }
 }
 
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub fn import_object(
     orb: CORBA_ORB,
     s: &str,
     ev: &mut CORBA_Environment,
 ) -> Result<CORBA_Object, String> {
-    if s.len() == 0 {
+    assert!(!orb.is_null());
+
+    if s.is_empty() {
         return Err("Empty s".to_owned());
     }
 

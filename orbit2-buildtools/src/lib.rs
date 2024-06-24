@@ -156,7 +156,7 @@ impl CommonBuilder {
                     false
                 }
             })
-            .map(|r| r.map_err(|e| Error::Io(e)))
+            .map(|r| r.map_err(Error::Io))
             .collect::<Result<Vec<PathBuf>>>();
 
         cfiles
@@ -243,7 +243,7 @@ mod tests {
         let mut cfiles = cfiles.unwrap();
 
         //assert!( cfiles.iter().zip())
-        let filenames = vec!["echo-common.c", "echo-skels.c", "echo-stubs.c", "echo.h"];
+        let filenames = ["echo-common.c", "echo-skels.c", "echo-stubs.c", "echo.h"];
         cfiles.sort();
         //assert_eq!(cfiles, ["ba", "ba"].map(|s| PathBuf::from_str(s).unwrap()));
         assert!(cfiles
@@ -256,6 +256,6 @@ mod tests {
 
     #[test]
     fn find_includes_test() {
-        assert!(find_orbit2_includes().len() > 0);
+        assert!(!find_orbit2_includes().is_empty());
     }
 }

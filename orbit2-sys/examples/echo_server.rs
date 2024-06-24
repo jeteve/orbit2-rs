@@ -17,7 +17,7 @@ static mut GLOBAL_ORB: CORBA_ORB = null_mut();
 static mut ROOT_POA: PortableServer_POA = null_mut();
 
 fn server_init(
-    args: &Vec<String>,
+    args: &[String],
     orb: *mut CORBA_ORB,
     poa: *mut PortableServer_POA,
     ev: *mut CORBA_Environment,
@@ -30,7 +30,7 @@ fn server_init(
     unsafe { CORBA_exception_init(&mut local_ev) };
     dbg!(local_ev);
 
-    let (mut argc, mut argv) = vecs_to_argcv(&args);
+    let (mut argc, mut argv) = vecs_to_argcv(args);
 
     dbg!(argc);
     dbg!(&argv);
@@ -89,7 +89,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     dbg!(unsafe { ROOT_POA });
 
     server_init(
-        &vec!["--help".to_owned()],
+        &["--help".to_owned()],
         unsafe { addr_of_mut!(GLOBAL_ORB) },
         unsafe { addr_of_mut!(ROOT_POA) },
         &mut ev,

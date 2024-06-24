@@ -59,7 +59,7 @@ static mut impl_Echo_epv: POA_Echo__epv = unsafe { mem::zeroed() };
 static mut impl_Echo_base_epv: PortableServer_ServantBase__epv = unsafe { mem::zeroed() };
 static mut impl_Echo_vepv: POA_Echo__vepv = unsafe { mem::zeroed() };
 
-pub fn init_global_structs() -> () {
+pub fn init_global_structs() {
     // See echo-skepimpl.c for C implementation
     unsafe {
         impl_Echo_epv._private = null_mut();
@@ -109,11 +109,16 @@ return retval;
 }
  */
 
+///
+/// # Safety
+///  Any null pointer given will cause panic!
+///
 #[no_mangle]
 pub unsafe extern "C" fn impl_Echo__create(
     poa: PortableServer_POA,
     ev: *mut CORBA_Environment,
 ) -> Echo {
+    assert!(!ev.is_null());
     let mut new_subservant: POA_Echo = unsafe { mem::zeroed() };
     new_subservant.vepv = std::ptr::addr_of_mut!(impl_Echo_vepv);
 
@@ -147,11 +152,15 @@ found fn item `extern "C" fn(*mut impl_POA_Echo, *mut i8, *mut servant::CORBA_En
 
 */
 
+/// # Safety
+/// Any null pointer given to this will panic
 #[no_mangle]
 pub unsafe extern "C" fn impl_Echo__destroy(
     servant: *mut c_void, // impl_POA_Echo
     ev: *mut CORBA_Environment,
 ) {
+    assert!(!servant.is_null());
+    assert!(!ev.is_null());
     let poa_object = (*(servant as *mut impl_POA_Echo)).poa as CORBA_Object;
 
     CORBA_Object_release(poa_object, ev);
@@ -164,15 +173,22 @@ pub unsafe extern "C" fn impl_Echo__destroy(
     POA_Echo__fini(servant as PortableServer_Servant, ev);
 
     // To actually free the rust side memory.
+    #[allow(clippy::from_raw_with_void_ptr)]
     drop(Box::from_raw(dbg!(servant)));
 }
 
+///
+/// # Safety
+/// If you give null pointers to this, it will panic.
 #[no_mangle]
 pub unsafe extern "C" fn impl_Echo_echoString(
     servant: *mut c_void, //impl_POA_Echo, // impl_POA_Echo,
     input: *const CORBA_char,
     ev: *mut CORBA_Environment,
-) -> () {
+) {
+    assert!(!servant.is_null());
+    assert!(!input.is_null());
+    assert!(!ev.is_null());
     // What the method does:
     let real_servant = servant as *mut impl_POA_Echo;
     (*real_servant).counter += 1;
