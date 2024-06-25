@@ -23,6 +23,15 @@ dnf install -y ORBit2-devel clang-devel && dnf clean all
 
 You can find the Orbit2 source code here: <https://github.com/Distrotech/ORBit2>
 
+Additionally, debian based systems used to have the lib:
+
+See
+<https://sources.debian.org/src/orbit2/>
+
+and
+
+<https://tracker.debian.org/pkg/orbit2>
+
 ## Checking prerequisites
 
 You should be able to do `pkg-config  ORBit-2.0 --cflags --libs --static`
