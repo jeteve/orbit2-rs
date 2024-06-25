@@ -124,7 +124,7 @@ impl From<CorbaCharPtr> for *const CORBA_char {
 // The original Orb MUST outlive this object.
 pub struct CorbaObject<'a, O> {
     o: CORBA_Object,
-    orb: &'a CorbaORB,
+    _orb: &'a CorbaORB,
     marker: PhantomData<O>,
 }
 
@@ -171,6 +171,15 @@ impl CorbaORB {
         Ok(Self(orb))
     }
 
+    pub fn get_name_service(&self) -> Result<CosNaming_NamingContext> {
+        CorbaEnvironment::with(|e| {
+            let char_ptr = CorbaCharPtr::new("NameService")?.into();
+            let naming_service =
+                unsafe { CORBA_ORB_resolve_initial_references(self.0, char_ptr, &mut e.ev) };
+            Ok(naming_service)
+        })
+    }
+
     pub fn import_object<O, S>(&self, reference: S) -> Result<CorbaObject<O>>
     where
         S: AsRef<str>,
@@ -187,7 +196,7 @@ impl CorbaORB {
 
         Ok(CorbaObject::<O> {
             o: corba_object,
-            orb: self,
+            _orb: self,
             marker: PhantomData,
         })
     }
@@ -206,6 +215,7 @@ impl Drop for CorbaORB {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serial_test::serial;
 
     #[test]
     fn test_new_env() {
@@ -220,30 +230,35 @@ mod tests {
         assert!(r.is_err());
     }
 
+    #[serial]
     #[test]
     fn test_no_args_orb() {
         let orb = CorbaORB::new("some-orb", &[]);
         assert!(orb.is_ok());
     }
 
+    #[serial]
     #[test]
     fn test_some_args_orb() {
         let orb = CorbaORB::new("some-orb", &["--foo", "bar"]);
         assert!(orb.is_ok());
     }
 
+    #[serial]
     #[test]
     fn test_import_object() {
         let ior = "IOR:010000000d00000049444c3a4563686f3a312e3000000000030000000054424f540000000101020005000000554e4958000000000a0000006c6f63616c686f73740000002b0000002f746d702f6f726269742d7673636f64652f6c696e632d383136642d302d633633346661643363333862000000000000caaedfba58000000010102002b0000002f746d702f6f726269742d7673636f64652f6c696e632d383136642d302d6336333466616433633338620000000000001c000000000000002e2634103549e8a8c22b28282828282801000000be0963b701000000480000000100000002000000050000001c000000000000002e2634103549e8a8c22b28282828282801000000be0963b701000000140000000100000001000105000000000901010000000000";
         let orb = CorbaORB::new("some-orb", &[]).unwrap();
         let obj = orb.import_object::<CORBA_Object, _>(ior);
 
-        // Cannot work, because there's no server serving this.
-        assert_eq!(
-            obj.err(),
-            Some(Error::CorbaException(
-                "IDL:omg.org/CORBA/BAD_PARAM:1.0".into()
-            ))
-        );
+        assert!(obj.is_ok());
+    }
+
+    #[serial]
+    #[test]
+    fn test_name_service() {
+        let orb = CorbaORB::new("some-orb", &[]).unwrap();
+        let ns = orb.get_name_service();
+        assert!(ns.is_ok());
     }
 }

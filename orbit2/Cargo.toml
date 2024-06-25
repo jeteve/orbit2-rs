@@ -12,3 +12,4 @@ orbit2-sys = { path = "../orbit2-sys", version = ">=0.1.1-alpha.2" }
 [dev-dependencies]
 # For the example
 orbit2-sample-idls = { path = "../orbit2-sample-idls" }
+serial_test = "3.1.1"

@@ -29,6 +29,7 @@ fn main() {
         .allowlist_function("CORBA_exception_init")
         .allowlist_type("CORBA_unsigned_long_long")
         .allowlist_type("CORBA_long_long")
+        .allowlist_item("CosNaming_NamingContext")
         .allowlist_function("CORBA_ORB_init")
         .allowlist_function("CORBA_ORB_destroy")
         .allowlist_function("CORBA_free")
