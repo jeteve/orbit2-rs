@@ -167,6 +167,7 @@ fn find_orbit2_includes() -> Vec<PathBuf> {
     pkg_config::Config::new()
         .atleast_version("2.14.19")
         .print_system_cflags(true)
+        .cargo_metadata(false)
         .probe("ORBit-2.0")
         // Expect is fine as this has orbit2-sys as a dependency
         .expect("Cannot find ORBit-2.0 with pkg_config")

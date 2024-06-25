@@ -6,6 +6,7 @@ fn main() {
     let lib = pkg_config::Config::new()
         .atleast_version("2.14.19")
         .print_system_cflags(true)
+        .statik(true)
         .probe("ORBit-2.0")
         .expect("Cannot find ORBit-2.0 with pkg_config");
 
