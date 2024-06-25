@@ -1,6 +1,6 @@
 [package]
 name = "orbit2-sys"
-version = "0.1.1-alpha.1"
+version = "0.1.1-alpha.2"
 edition = "2021"
 description = "A Rust binding for the ORBit2 Gnome CORBA library"
 license = "MIT"
