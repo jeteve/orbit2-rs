@@ -2,7 +2,12 @@
 name = "orbit2"
 version = "0.1.0"
 edition = "2021"
+description = "A Rust idiomatic layer for orbit2-sys"
+homepage = "https://github.com/jeteve/orbit2-rs"
 
 [dependencies]
-orbit2-sys = { path = "../orbit2-sys" }
+orbit2-sys = { path = "../orbit2-sys", version = ">=0.1.1-alpha.2" }
+
+[dev-dependencies]
+# For the example
 orbit2-sample-idls = { path = "../orbit2-sample-idls" }
