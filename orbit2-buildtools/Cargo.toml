@@ -2,12 +2,14 @@
 name = "orbit2-buildtools"
 version = "0.1.0"
 edition = "2021"
+description = "Some tools to build some Corba binding from IDLs using orbit2-sys"
+license = "MIT"
+homepage = "https://github.com/jeteve/orbit2-rs"
 
 [dependencies]
 bindgen = ">=0.69.4"
 pkg-config = ">=0.3.30"
 cc = ">=1.0.99"
-# orbit2-sys = { path = "../orbit2-sys" }
 tempdir = ">=0.3.7"
 
 [dev-dependencies]
