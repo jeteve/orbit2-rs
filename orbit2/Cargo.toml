@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "A Rust idiomatic layer for orbit2-sys"
 homepage = "https://github.com/jeteve/orbit2-rs"
+license = "MIT"
 
 [dependencies]
 orbit2-sys = { path = "../orbit2-sys", version = ">=0.1.1-alpha.2" }
