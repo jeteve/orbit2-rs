@@ -1,6 +1,6 @@
 [package]
 name = "orbit2"
-version = "0.1.0"
+version = "0.1.1-alpha.1"
 edition = "2021"
 description = "A Rust idiomatic layer for orbit2-sys"
 homepage = "https://github.com/jeteve/orbit2-rs"
