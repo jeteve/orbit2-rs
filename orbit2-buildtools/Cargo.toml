@@ -1,6 +1,6 @@
 [package]
 name = "orbit2-buildtools"
-version = "0.1.0"
+version = "0.1.1-alpha.1"
 edition = "2021"
 description = "Some tools to build some Corba binding from IDLs using orbit2-sys"
 license = "MIT"
