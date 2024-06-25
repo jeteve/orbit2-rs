@@ -12,6 +12,8 @@ The source code is there: <https://github.com/jeteve/orbit2-rs>
 
 ### On RPM based distributions
 
+See <https://pkgs.org/search/?q=orbit2>
+
 ```sh
 dnf install -y epel-release which && dnf clean all
 dnf install -y ORBit2-devel clang-devel && dnf clean all
