@@ -2,6 +2,10 @@
 name = "orbit2-sys"
 version = "0.1.0"
 edition = "2021"
+description = "A Rust binding for the ORBit2 Gnome CORBA library"
+license = "MIT"
+documentation = "https://github.com/jeteve/orbit2-rs"
+homepage = "https://github.com/jeteve/orbit2-rs"
 
 [dependencies]
 log = ">=0.4.21"
