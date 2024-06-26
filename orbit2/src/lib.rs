@@ -195,6 +195,8 @@ impl CorbaObject<CosNaming_NamingContext> {
     }
 }
 
+//reason = "The ArgCV will get dropped at the same time as the ORB"
+#[allow(dead_code)]
 pub struct CorbaORB(CORBA_ORB, ArgCV);
 
 //"orbit-local-orb"
