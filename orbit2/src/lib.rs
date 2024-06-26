@@ -122,13 +122,12 @@ impl From<CorbaCharPtr> for *const CORBA_char {
 }
 
 // The original Orb MUST outlive this object.
-pub struct CorbaObject<'a, O> {
+pub struct CorbaObject<O> {
     o: CORBA_Object,
-    _orb: &'a CorbaORB,
     marker: PhantomData<O>,
 }
 
-impl<'a, O> Drop for CorbaObject<'a, O> {
+impl<O> Drop for CorbaObject<O> {
     fn drop(&mut self) {
         CorbaEnvironment::with(|e| {
             unsafe { CORBA_Object_release(self.o, &mut e.ev) };
@@ -138,7 +137,7 @@ impl<'a, O> Drop for CorbaObject<'a, O> {
     }
 }
 
-impl<'a, O> CorbaObject<'a, O> {
+impl<O> CorbaObject<O> {
     pub fn with<F, T>(&mut self, c: F) -> Result<T>
     where
         F: FnOnce(&mut Self, &mut CorbaEnvironment) -> Result<T>,
@@ -171,12 +170,15 @@ impl CorbaORB {
         Ok(Self(orb))
     }
 
-    pub fn get_name_service(&self) -> Result<CosNaming_NamingContext> {
+    pub fn get_name_service(&self) -> Result<CorbaObject<CosNaming_NamingContext>> {
         CorbaEnvironment::with(|e| {
             let char_ptr = CorbaCharPtr::new("NameService")?.into();
             let naming_service =
                 unsafe { CORBA_ORB_resolve_initial_references(self.0, char_ptr, &mut e.ev) };
-            Ok(naming_service)
+            Ok(CorbaObject::<CosNaming_NamingContext> {
+                o: naming_service,
+                marker: PhantomData,
+            })
         })
     }
 
@@ -196,7 +198,6 @@ impl CorbaORB {
 
         Ok(CorbaObject::<O> {
             o: corba_object,
-            _orb: self,
             marker: PhantomData,
         })
     }
