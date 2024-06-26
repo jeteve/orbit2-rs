@@ -8,8 +8,9 @@ ARG USER_GID=1000
 RUN dnf install -y git sudo which patch epel-release which && dnf clean all
 RUN dnf install -y ORBit2-devel python3 make  \
     clang-devel cmake llvm llvm-devel perl-FindBin \
-    perl-IPC-Cmd && dnf clean all
+    perl-IPC-Cmd gmp gmp-devel && dnf clean all
 
+RUN dnf config-manager --set-enabled devel && dnf install -y libcbor-devel
 
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
