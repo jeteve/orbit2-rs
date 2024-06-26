@@ -6,7 +6,7 @@ use std::{
     str::Utf8Error,
 };
 
-use orbit2_sys::{core::*, toolkit::charptr_to_string};
+use orbit2_sys::core::*;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -156,7 +156,7 @@ impl CorbaObject<CosNaming_NamingContext> {
         "blabla".into()
     }
 
-    pub fn resolve<O>(id_vec: &[impl AsRef<str>]) -> Result<CorbaObject<O>> {
+    pub fn resolve<O>(&self, id_vec: &[impl AsRef<str>]) -> Result<CorbaObject<O>> {
         assert!(!id_vec.is_empty());
 
         let empty_char = CorbaCharPtr::new("").unwrap();
@@ -167,26 +167,35 @@ impl CorbaObject<CosNaming_NamingContext> {
 
         let len = u32::try_from(char_ptrs.len()).expect("ID Vector too long");
 
-        /*let buffer_components = char_ptrs.into_iter().map(|c| c.0)
-        .map(|c| CORBA_sequence_CosNaming_NameComponent{})
-        .collect::<Vec<_>>();
+        let mut buffer = char_ptrs
+            .into_iter()
+            .map(|c| c.0)
+            .map(|c| CosNaming_NameComponent {
+                id: c,
+                kind: empty_char.0,
+            })
+            .collect::<Vec<_>>();
 
-        let buffer = CORBA_sequence_CosNaming_NameComponent{}
-        */
-
-        // put on heap as we need to give up ownership later on.
+        // put on heap as we need to give up ownership to the CosNameing_NamingContext_resolve function.
         let name: Box<CosNaming_Name> = Box::new(CosNaming_Name {
             _maximum: len,
             _length: len,
-            _buffer: todo!(),
+            _buffer: buffer.as_mut_ptr(),
             _release: 1,
         });
-        //CosNaming_NamingContext_resolve(self.o, Box::into_raw(name));
-        todo!()
+
+        let cobj = CorbaEnvironment::with(|e| {
+            Ok(unsafe { CosNaming_NamingContext_resolve(self.o, Box::into_raw(name), &mut e.ev) })
+        })?;
+
+        Ok(CorbaObject::<O> {
+            o: cobj,
+            marker: PhantomData,
+        })
     }
 }
 
-pub struct CorbaORB(CORBA_ORB);
+pub struct CorbaORB(CORBA_ORB, ArgCV);
 
 //"orbit-local-orb"
 impl CorbaORB {
@@ -203,7 +212,7 @@ impl CorbaORB {
                 &mut e.ev,
             ))
         })?;
-        Ok(Self(orb))
+        Ok(Self(orb, argcv))
     }
 
     pub fn get_name_service(&self) -> Result<CorbaObject<CosNaming_NamingContext>> {
@@ -294,6 +303,16 @@ mod tests {
         let orb = CorbaORB::new("some-orb", &[]).unwrap();
         let ns = orb.get_name_service();
         assert!(ns.is_ok());
-        assert_eq!(ns.unwrap().blabla(), "blabla")
+        let ns = ns.unwrap();
+        assert_eq!(ns.blabla(), "blabla");
+
+        let obj = ns.resolve::<CORBA_Object>(&["Foo", "Bar"]);
+        assert!(obj.is_err());
+        assert_eq!(
+            obj.err(),
+            Some(Error::CorbaException(
+                "IDL:omg.org/CORBA/INV_OBJREF:1.0".to_owned()
+            ))
+        )
     }
 }

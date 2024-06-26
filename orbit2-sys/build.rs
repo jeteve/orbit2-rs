@@ -10,6 +10,13 @@ fn main() {
         .probe("ORBit-2.0")
         .expect("Cannot find ORBit-2.0 with pkg_config");
 
+    let _cosnaming_lib = pkg_config::Config::new()
+        .atleast_version("2.14.19")
+        .print_system_cflags(true)
+        .statik(true)
+        .probe("ORBit-CosNaming-2.0 ")
+        .expect("Cannot find ORBit-CosNaming-2.0 with pkg_config");
+
     let includes = lib
         .include_paths
         .iter()
