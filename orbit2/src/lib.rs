@@ -25,7 +25,7 @@ impl std::error::Error for Error {}
 type Result<R> = std::result::Result<R, Error>;
 
 pub struct CorbaEnvironment {
-    ev: CORBA_Environment,
+    pub ev: CORBA_Environment,
 }
 
 impl CorbaEnvironment {
