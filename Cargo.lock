@@ -281,7 +281,7 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
 name = "orbit2"
-version = "0.1.1-alpha.1"
+version = "0.1.1-alpha.2"
 dependencies = [
  "orbit2-sample-idls",
  "orbit2-sys",
@@ -290,7 +290,7 @@ dependencies = [
 
 [[package]]
 name = "orbit2-buildtools"
-version = "0.1.1-alpha.1"
+version = "0.1.1-alpha.2"
 dependencies = [
  "bindgen",
  "cc",
@@ -309,7 +309,7 @@ dependencies = [
 
 [[package]]
 name = "orbit2-sys"
-version = "0.1.1-alpha.2"
+version = "0.1.1-alpha.3"
 dependencies = [
  "bindgen",
  "cc",
