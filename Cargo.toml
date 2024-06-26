@@ -1,3 +1,4 @@
 [workspace]
 resolver = "2"
-members = [ "orbit2","orbit2-buildtools", "orbit2-sample-idls", "orbit2-sys"]
+members = ["orbit2", "orbit2-buildtools", "orbit2-sample-idls", "orbit2-sys"]
+default-members = ["orbit2", "orbit2-buildtools", "orbit2-sys"]
