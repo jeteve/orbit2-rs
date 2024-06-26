@@ -2,7 +2,11 @@
 
 An idiomatic Rust layer on top of orbit2-sys
 
-## Notes from the original ORBit doc.
+## Implementing Corba clients lib and services
+
+See crate `orbit2-buildtools`.
+
+## Notes from the original ORBit doc
 
 Note: it is possible to use a third-party naming service, e.g. using the --ORBNamingIOR command
 line option.
@@ -14,8 +18,8 @@ ORBIIOPUSock=1
 ORBIIOPIPv4=1
 ORBIIOPIPv6=0
 
-
 Note: resolves default name-service, usually given to application as
- * command line argument "-ORBInitRef NameService=IOR:0100000028..",
- * or since release 2.8.0 corbalocs in form of URL can be used, eg:
- * "-ORBInitRef NameService=corbaloc:iiop:HOSTNAME:PORT/NameService%00"
+
+* command line argument "-ORBInitRef NameService=IOR:0100000028..",
+* or since release 2.8.0 corbalocs in form of URL can be used, eg:
+* "-ORBInitRef NameService=corbaloc:iiop:HOSTNAME:PORT/NameService%00"

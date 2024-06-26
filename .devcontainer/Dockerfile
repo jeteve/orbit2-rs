@@ -6,7 +6,7 @@ ARG USER_GID=1000
 
 
 RUN dnf install -y git sudo which epel-release which && dnf clean all
-RUN dnf install -y ORBit2-devel clang-devel perl-FindBin perl-IPC-Cmd && dnf clean all
+RUN dnf install -y ORBit2-devel clang-devel llvm perl-FindBin perl-IPC-Cmd && dnf clean all
 
 
 RUN groupadd --gid $USER_GID $USERNAME \

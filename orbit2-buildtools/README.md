@@ -1,3 +1,7 @@
+# orbit2-buildtools
+
+Tooling for implementing Corba clients and servers for the `orbit2` crate.
+
 # How to build a common IDL lib (no service code, just types and client)
 
 For the rest of this readme, we assume that your library containing your IDLs binding
@@ -72,3 +76,9 @@ include!(env!("ECHO_IDL_BINDING"));
 ```
 
 And that's it. Now you can use your module in your client and server applications.
+
+# How to build an implementation
+
+First you'll need the c2rust tool from there: <https://github.com/immunant/c2rust?tab=readme-ov-file>
+
+Then you'll need
