@@ -79,6 +79,14 @@ And that's it. Now you can use your module in your client and server application
 
 # How to build an implementation
 
+TODO!
+
+## Translating C Code to Rust
+
 First you'll need the c2rust tool from there: <https://github.com/immunant/c2rust?tab=readme-ov-file>
 
-Then you'll need
+Example:
+
+```sh
+CC=clang CXX=clang++ cargo install c2rust --git https://github.com/immunant/c2rust.git
+```
