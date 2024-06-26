@@ -6,7 +6,7 @@ use std::{
     str::Utf8Error,
 };
 
-use orbit2_sys::core::*;
+use orbit2_sys::{core::*, toolkit::charptr_to_string};
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -150,6 +150,42 @@ impl<O> CorbaObject<O> {
     }
 }
 
+// Implementation for the naming service.
+impl CorbaObject<CosNaming_NamingContext> {
+    pub fn blabla(&self) -> String {
+        "blabla".into()
+    }
+
+    pub fn resolve<O>(id_vec: &[impl AsRef<str>]) -> Result<CorbaObject<O>> {
+        assert!(!id_vec.is_empty());
+
+        let empty_char = CorbaCharPtr::new("").unwrap();
+        let char_ptrs = id_vec
+            .iter()
+            .map(CorbaCharPtr::new)
+            .collect::<Result<Vec<_>>>()?;
+
+        let len = u32::try_from(char_ptrs.len()).expect("ID Vector too long");
+
+        /*let buffer_components = char_ptrs.into_iter().map(|c| c.0)
+        .map(|c| CORBA_sequence_CosNaming_NameComponent{})
+        .collect::<Vec<_>>();
+
+        let buffer = CORBA_sequence_CosNaming_NameComponent{}
+        */
+
+        // put on heap as we need to give up ownership later on.
+        let name: Box<CosNaming_Name> = Box::new(CosNaming_Name {
+            _maximum: len,
+            _length: len,
+            _buffer: todo!(),
+            _release: 1,
+        });
+        //CosNaming_NamingContext_resolve(self.o, Box::into_raw(name));
+        todo!()
+    }
+}
+
 pub struct CorbaORB(CORBA_ORB);
 
 //"orbit-local-orb"
@@ -182,10 +218,7 @@ impl CorbaORB {
         })
     }
 
-    pub fn import_object<O, S>(&self, reference: S) -> Result<CorbaObject<O>>
-    where
-        S: AsRef<str>,
-    {
+    pub fn import_object<O>(&self, reference: impl AsRef<str>) -> Result<CorbaObject<O>> {
         let ref_str = reference.as_ref();
         if ref_str.is_empty() {
             return Err(Error::EmptyReference);
@@ -250,7 +283,7 @@ mod tests {
     fn test_import_object() {
         let ior = "IOR:010000000d00000049444c3a4563686f3a312e3000000000030000000054424f540000000101020005000000554e4958000000000a0000006c6f63616c686f73740000002b0000002f746d702f6f726269742d7673636f64652f6c696e632d383136642d302d633633346661643363333862000000000000caaedfba58000000010102002b0000002f746d702f6f726269742d7673636f64652f6c696e632d383136642d302d6336333466616433633338620000000000001c000000000000002e2634103549e8a8c22b28282828282801000000be0963b701000000480000000100000002000000050000001c000000000000002e2634103549e8a8c22b28282828282801000000be0963b701000000140000000100000001000105000000000901010000000000";
         let orb = CorbaORB::new("some-orb", &[]).unwrap();
-        let obj = orb.import_object::<CORBA_Object, _>(ior);
+        let obj = orb.import_object::<CORBA_Object>(ior);
 
         assert!(obj.is_ok());
     }
@@ -261,5 +294,6 @@ mod tests {
         let orb = CorbaORB::new("some-orb", &[]).unwrap();
         let ns = orb.get_name_service();
         assert!(ns.is_ok());
+        assert_eq!(ns.unwrap().blabla(), "blabla")
     }
 }
