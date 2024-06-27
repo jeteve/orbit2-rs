@@ -100,6 +100,9 @@ impl CorbaCharPtr {
         let cs = CString::new(s.as_ref()).map_err(Error::NullInString)?;
         Ok(Self(cs.into_raw()))
     }
+    pub fn as_raw_ptr(&self) -> *mut CORBA_char {
+        self.0
+    }
 }
 
 // Meh some CORBA functions copy the pointer so we cannot drop that like all the time.
