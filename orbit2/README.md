@@ -23,3 +23,7 @@ Note: resolves default name-service, usually given to application as
 * command line argument "-ORBInitRef NameService=IOR:0100000028..",
 * or since release 2.8.0 corbalocs in form of URL can be used, eg:
 * "-ORBInitRef NameService=corbaloc:iiop:HOSTNAME:PORT/NameService%00"
+
+## TODOs
+
+Deal with exceptions correctly. See orbit-docs/orbit-docs/orbit/x894.html#AEN897
