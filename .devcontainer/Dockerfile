@@ -20,4 +20,5 @@ RUN groupadd --gid $USER_GID $USERNAME \
 USER $USERNAME
 
 RUN curl --proto '=https' https://sh.rustup.rs | sh  -s -- -y
-RUN source "$HOME/.cargo/env" && cargo install cargo-release
+
+# RUN source "$HOME/.cargo/env" && cargo install cargo-release
